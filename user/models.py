@@ -56,7 +56,11 @@ class UserProfile(models.Model):
     
 class ThirdPartyPlatforms(models.Model):
     profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='third_party_platforms')
-    title = models.CharField(max_length=255)
+    platform_name = models.CharField(max_length=255)
+    connection_status = models.BooleanField(default=False)
+    
+class ThirdPartyPlatformCredentials(models.Model):
+    platform = models.ForeignKey(ThirdPartyPlatforms, on_delete=models.CASCADE, related_name='platform_credentials')
     accout_link = models.URLField()
     access_token = models.CharField(max_length=255, null=True, blank=True)
     acces_expire_in = models.IntegerField()

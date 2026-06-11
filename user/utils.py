@@ -2,6 +2,9 @@
 from django.core.cache import cache
 import random
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+from django.template.loader import render_to_string
 
 
 def generate_verification_template(otp):
@@ -106,4 +109,51 @@ class OTPManager:
         
         if purpose == "singup":
             subject = "Verify opt for singup"
+            message = generate_verification_template(otp)
+        elif purpose == "password_reset":
+            subject = "Password reset opt for verification"
+            message = generate_verification_template(otp)
             
+        else:
+            raise ValueError("Invalid otp")
+        
+           
+""" 
+    =====================
+        BASE API View
+    =====================
+"""           
+from rest_framework.decorators import APIView
+from rest_framework.response import Response 
+from rest_framework import status
+
+class BaseAPIView(APIView):
+    
+    def _get_user(self, request):
+        return request.user
+    
+    def _get_user_id(slef, request):
+        return request.user.id
+    
+    def _get_user_profile_object(self, request, profile):
+        profile = profile.objects.get(id=request.user)
+        return profile
+    
+    def success_response(self, message, data, status_code):
+        
+        return Response({
+            "stauts":True,
+            "message":message,
+            "data":data,
+            "status":status_code
+        }, status=status.HTTP_200_OK) 
+        
+    def failed_response(self, message, data, status_code):
+        
+        return Response({
+            "stauts":True,
+            "message":message,
+            "data":data,
+            "status":status_code
+        }, status=status.HTTP_400_BAD_REQUEST) 
+                   
