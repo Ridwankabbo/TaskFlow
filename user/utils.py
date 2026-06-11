@@ -109,9 +109,23 @@ class OTPManager:
         
         if purpose == "singup":
             subject = "Verify opt for singup"
-            message = generate_verification_template(otp)
+            from_email = settings.EMAIL_HOST_USER
+            to = [email]
+            context = {
+                'otp': otp
+            }
+            html_content = render_to_string('emails/otp_verification.html', context=context)
+            text_content = strip_tags(html_content)
+            email = EmailMultiAlternatives(subject, text_content, from_email, to)
+            email.attach_alternative(html_content, 'text/html')
+            email.send()
         elif purpose == "password_reset":
             subject = "Password reset opt for verification"
+            from_email = settings.EMAIL_HOST_USER
+            to = [email]
+            context = {
+                'otp': otp
+            }
             message = generate_verification_template(otp)
             
         else:
