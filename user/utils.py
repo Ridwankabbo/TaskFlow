@@ -75,51 +75,48 @@ class OTPManager:
     
     OTP_EXPIRATION_TIME = 300 # OTP expiration time in seconds
     
-    def generate_otp():
+    @classmethod
+    def generate_otp(self):
         return str(random.randint(100000, 999999))
     
+    @classmethod
     def store_otp(self, email, otp, purpose):
         key = f"{email}_{purpose}"
         cache.set(key, otp, timeout=self.OTP_EXPIRATION_TIME)
     
-    def verify_otp(self, email, otp, purpose):
-        key = f"{email}_{purpose}"
+    @classmethod
+    def verify_otp(self, email, otp, purpase):
+        key = f"{email}_{purpase}"
         stored_opt = cache.get(key)
         if stored_opt==otp:
             cache.delete(key)
                         
-            if purpose == "password_reset":
+            if purpase == "password_reset":
                 key = f"{email}_password_reset_verified"
                 cache.set(key, True, timeout=self.OTP_EXPIRATION_TIME)
                 
-            return {
-                "status":True,
-                "message":"OTP verified_successfull"
-            }
-        return {
-            "status":False,
-            "messsage":"OTP verification failed"
-        }
-        
+            return True
+        return False
+    @classmethod   
     def is_password_reset_verefied(slef, otp, email):
         return cache.get(f"{email}_password_reset_verified")
     
-    
-    def send_verification_otp(self, email, otp, purpose):
+    @classmethod
+    def send_verification_otp(self, email, otp, purpase):
         
-        if purpose == "singup":
+        if purpase == "singup":
             subject = "Verify opt for singup"
             from_email = settings.EMAIL_HOST_USER
             to = [email]
             context = {
                 'otp': otp
             }
-            html_content = render_to_string('emails/otp_verification.html', context=context)
+            html_content = render_to_string('email_template/otp_verification.html', context=context)
             text_content = strip_tags(html_content)
             email = EmailMultiAlternatives(subject, text_content, from_email, to)
             email.attach_alternative(html_content, 'text/html')
             email.send()
-        elif purpose == "password_reset":
+        elif purpase == "password_reset":
             subject = "Password reset opt for verification"
             from_email = settings.EMAIL_HOST_USER
             to = [email]
@@ -170,4 +167,16 @@ class BaseAPIView(APIView):
             "data":data,
             "status":status_code
         }, status=status.HTTP_400_BAD_REQUEST) 
-                   
+
+""" 
+    =========================
+        TOKEN GENERATOR
+    =========================
+"""                   
+from rest_framework_simplejwt.tokens import RefreshToken               
+def generate_tokens(user):
+    refresh_token = RefreshToken.for_user(user)
+    return {
+        "access_token":str(refresh_token.access_token),
+        "refresh_token": str(refresh_token)
+    }

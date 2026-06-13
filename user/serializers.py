@@ -1,6 +1,8 @@
 from .models import User, UserProfile
 from rest_framework import serializers
 from .utils import OTPManager
+from django.contrib.auth import authenticate
+from rest_framework import status
 
 otp_management = OTPManager()
 
@@ -22,7 +24,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         generated_otp = otp_management.generate_otp()
         otp_management.send_verification_otp(email, generated_otp, 'singup')
-        return 
+        return validated_data
         
     
         
@@ -32,9 +34,76 @@ class UserLoginSerializer(serializers.ModelSerializer):
         fields = ['email', 'password']
         
         
+    def validate(self, attrs):
+        email = attrs['email']
+        password = attrs['password']
+        
+        if not email :
+            raise serializers.ValidationError(
+                {
+                    "message":"Email is required",
+                    "status":status.HTTP_400_BAD_REQUEST
+                }
+            )
+        if not password:
+            raise serializers.ValidationError(
+                {
+                    "message":"Password is required",
+                    "status":status.HTTP_400_BAD_REQUEST
+                }
+            )
+            
+        if not email and password:
+            raise serializers.ValidationError(
+                {
+                    "message":"Email and Password is required",
+                    "status":status.HTTP_400_BAD_REQUEST
+                }
+            )
+        
+        user = authenticate(username=email, password=password)
+        
+        if not user:
+            raise serializers.ValidationError(
+                {
+                    "message":"Please register before login",
+                    "status":status.HTTP_404_BAD_REQUEST
+                }
+            )
+        if not user.is_active:
+            raise serializers.ValidationError(
+                {
+                    "message":"Account is not activated",
+                    "status":status.HTTP_400_BAD_REQUEST
+                }
+            )
+            
+        return attrs 
+        
+        
 class OptVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField()
+    purpase = serializers.CharField()
+    def validate(self, attrs):
+        email = attrs['email']
+        otp = attrs['otp']
+        purpase = attrs['purpase']
+        verify_otp = otp_management.verify_otp(email=email, otp=otp, purpase=purpase)
+        if not verify_otp :
+            raise serializers.ValidationError({
+                "message":"Invalid otp"
+            })
+        if purpase == 'singup':
+            try:
+                user = User.objects.get(email=email)
+                user.is_active=True
+                user.save()
+            except User.DoesNotExist:
+                raise serializers.ValidationError({
+                    "message":"User with this email is not found"
+                })
+        return attrs
     
     
 class ResetPasswordSerializer(serializers.Serializer):
