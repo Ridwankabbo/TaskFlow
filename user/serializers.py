@@ -23,6 +23,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             username = username
         )
         generated_otp = otp_management.generate_otp()
+        otp_management.store_otp(email, generated_otp, 'singup')
         otp_management.send_verification_otp(email, generated_otp, 'singup')
         return validated_data
         
@@ -105,18 +106,25 @@ class OptVerificationSerializer(serializers.Serializer):
                 })
         return attrs
     
-    
+
 class ResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     new_password = serializers.CharField()
     confirm_password = serializers.CharField()
     
     def validate(self, attrs):
-        if attrs['new_password'] == attrs['confirm_password']:
+        if attrs['new_password'] != attrs['confirm_password']:
             raise serializers.ValidationError({
                 "message":"new password and confirm password doesn't match"
             })
         return attrs
+    
+    
+class UserProfileSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = UserProfile
+        fields = '__all__'
     
 
 

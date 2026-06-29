@@ -49,10 +49,8 @@ class UserProfile(models.Model):
     avatar = models.ImageField(upload_to='profile_avatar', null=True, blank=True)
     is_premium = models.BooleanField(default=False)
     assignment_count = models.IntegerField(default=0)
-    stripe_customer_id=models.CharField(max_length=255, null=True, blank=True)
-    
-    
-    
+    # stripe_customer_id=models.CharField(max_length=255, null=True, blank=True)
+
     
 class ThirdPartyPlatforms(models.Model):
     profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='third_party_platforms')
@@ -66,3 +64,12 @@ class ThirdPartyPlatformCredentials(models.Model):
     acces_expire_in = models.IntegerField()
     refresh_token = models.CharField(max_length=255, null=True, blank=True)
     refresh_expire_in = models.IntegerField()
+    
+class Assingments(models.Model):
+    user_profile = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assingments')
+    name = models.CharField()
+    description = models.TextField()
+    implimentation = models.JSONField(default=list)
+    score = models.IntegerField(default=1)
+    dedline = models.DateTimeField()
+    
