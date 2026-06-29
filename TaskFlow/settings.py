@@ -40,6 +40,11 @@ INSTALLED_APPS = [
     
     # apps
     'user',
+    'ai',
+    
+    # installed app
+    'django_celery_results',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -143,3 +148,17 @@ EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER=os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD=os.getenv('EMAIL_HOST_PASSWORD')
+
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Dhaka'
+
+
+MAX_CURRENT_TASK = 5
+
+OPEN_AI_API = os.getenv('OPEN_ROUTER')
