@@ -150,7 +150,7 @@ class BaseAPIView(APIView):
         profile = profile.objects.get(id=request.user)
         return profile
     
-    def success_response(self, message, data, status_code):
+    def success_response(self, message, data=None, status_code=None):
         
         return Response({
             "stauts":True,

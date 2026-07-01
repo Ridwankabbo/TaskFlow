@@ -4,12 +4,22 @@ from .views import (
     UserLoginView,
     OtpVerificationView,
     ProfileView,
-    PassResetView
+    PassResetView,
+    ResendOTPView
+)
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView
 )
 urlpatterns = [
-    path('user/register/', UserRegistrationView.as_view(), name='user-registration'),
-    path('user/registration/', UserLoginView.as_view(), name='user-login'),
-    path('user/otp-veriti/', OtpVerificationView.as_view(), name='otp-verifi'),
-    path('user/profile/', ProfileView.as_view(), name='user-profile'),
-    path('user/password-reset/', PassResetView.as_view(), name='password-reset')
+    path('register/', UserRegistrationView.as_view(), name='user-registration'),
+    path('registration/', UserLoginView.as_view(), name='user-login'),
+    path('otp-veriti/', OtpVerificationView.as_view(), name='otp-verifi'),
+    path('resend-otp/', ResendOTPView.as_view(), name='resend-otp'),
+    path('profile/', ProfileView.as_view(), name='user-profile'),
+    path('password-reset/', PassResetView.as_view(), name='password-reset'),
+    
+    
+    path('token/access/', UserLoginView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

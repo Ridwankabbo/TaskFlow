@@ -163,3 +163,9 @@ CELERY_TIMEZONE = 'Asia/Dhaka'
 MAX_CURRENT_TASK = 5
 
 OPEN_AI_API = os.getenv('OPEN_ROUTER')
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}

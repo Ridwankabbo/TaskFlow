@@ -5,6 +5,7 @@ from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
     OptVerificationSerializer,
+    ResendOTPSerializer,
     ResetPasswordSerializer,
     UserProfileSerializer
 )
@@ -34,6 +35,7 @@ class UserRegistrationView(BaseAPIView):
             
             return self.success_response(
                 message="Account created successfully, otp send to your email please check to verify your account",
+                data=serializer.data,
                 status_code=status.HTTP_201_CREATED
             )
         return self.failed_response(
@@ -60,6 +62,11 @@ class UserLoginView(BaseAPIView):
                 },
                 status_code=status.HTTP_200_OK
             )
+        return self.failed_response(
+            message='Failed to login',
+            data=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
             
             
 # ---------------------------
@@ -78,6 +85,25 @@ class OtpVerificationView(BaseAPIView):
             )
         return self.failed_response(
             message='Otp verification failed',
+            data=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+        
+# ----------------------
+#   RESEND OTP
+# ----------------------
+class ResendOTPView(BaseAPIView):
+    
+    def post(self, request):
+        serializer = ResendOTPSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return self.success_response(
+                message="OTP resend successfull",
+                status_code=status.HTTP_200_OK
+            )
+        return self.failed_response(
+            message='Failed to resend OTP',
             data=serializer.errors,
             status_code=status.HTTP_400_BAD_REQUEST
         )

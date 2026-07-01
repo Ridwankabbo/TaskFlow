@@ -24,7 +24,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         generated_otp = otp_management.generate_otp()
         otp_management.store_otp(email, generated_otp, 'singup')
-        otp_management.send_verification_otp(email, generated_otp, 'singup')
+        print("generated otp", generated_otp)
+        # otp_management.send_verification_otp(email, generated_otp, 'singup')
         return validated_data
         
     
@@ -105,7 +106,24 @@ class OptVerificationSerializer(serializers.Serializer):
                     "message":"User with this email is not found"
                 })
         return attrs
+
+class ResendOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    purpase = serializers.CharField()
     
+    
+    def create(self, validated_data):
+        email = validated_data.get('email')
+        purpase = validated_data.get('purpase')
+        otp_management = OTPManager()
+        try:
+            user = User.objects.get(email=email)
+            regenerate_otp = otp_management.generate_otp()
+            otp_management.store_otp(email, regenerate_otp, purpase)
+            print("regenerated_otp: ", regenerate_otp)
+        except User.DoesNotExist:
+            raise ValueError("User with the email doesn't exists")
+        return validated_data
 
 class ResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
