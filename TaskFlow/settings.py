@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # apps
     'user',
     'ai',
+    'assigment',
     
     # installed app
     'django_celery_results',

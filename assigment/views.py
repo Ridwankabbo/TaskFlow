@@ -27,7 +27,7 @@ class AssigmentViewSet(viewsets.ModelViewSet):
         )
         
         # Trigger background task
-        process_assignment.delay(assignment.id)
+        # process_assignment.delay(assignment.id)
         
         serializer = self.get_serializer(assignment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

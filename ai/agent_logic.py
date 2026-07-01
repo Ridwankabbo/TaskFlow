@@ -4,7 +4,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from datetime import datetime
 import json
 
-llm = Ollama(model="llama3.1:8b", temperature=0.1)
+llm = Ollama(model="deepseek-r1:1.5b", temperature=0.1)
 
 parser = JsonOutputParser()
 
