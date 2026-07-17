@@ -162,7 +162,7 @@ class BaseAPIView(APIView):
     def failed_response(self, message, data, status_code):
         
         return Response({
-            "stauts":True,
+            "stauts":False,
             "message":message,
             "data":data,
             "status":status_code

@@ -7,7 +7,7 @@ from rest_framework import status
 otp_management = OTPManager()
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(read_only=True)
+    password = serializers.CharField(write_only=True)
     class Meta:
         model = User
         fields = ['email', 'username', 'password']
@@ -17,7 +17,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         email = validated_data.get('email')
         password = validated_data.get('password')
         username = validated_data.get('username')
-        user = User.objects.create_user(
+        User.objects.create_user(
             email=email,
             password = password,
             username = username
@@ -29,16 +29,36 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return validated_data
         
     
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+class UserLoginSerializer(TokenObtainPairSerializer):
+    # class Meta:
+    #     model = User
+    #     fields = ['email', 'password']
         
-class UserLoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['email', 'password']
-        
-        
+    username_fiels = 'email'
+    
     def validate(self, attrs):
         email = attrs['email']
         password = attrs['password']
+    
+        if email and password:
+                
+            user = authenticate(request=self.context.get('request'), username=email, password=password)
+        
+            if not user:
+                raise serializers.ValidationError(
+                    {
+                        "message":"Please register before login",
+                        "status":status.HTTP_400_BAD_REQUEST
+                    }
+                )
+            if not user.is_active:
+                raise serializers.ValidationError(
+                    {
+                        "message":"Account is not activated",
+                        "status":status.HTTP_400_BAD_REQUEST
+                    }
+                )
         
         if not email :
             raise serializers.ValidationError(
@@ -63,24 +83,9 @@ class UserLoginSerializer(serializers.ModelSerializer):
                 }
             )
         
-        user = authenticate(username=email, password=password)
         
-        if not user:
-            raise serializers.ValidationError(
-                {
-                    "message":"Please register before login",
-                    "status":status.HTTP_404_BAD_REQUEST
-                }
-            )
-        if not user.is_active:
-            raise serializers.ValidationError(
-                {
-                    "message":"Account is not activated",
-                    "status":status.HTTP_400_BAD_REQUEST
-                }
-            )
             
-        return attrs 
+        return super().validate(attrs) 
         
         
 class OptVerificationSerializer(serializers.Serializer):

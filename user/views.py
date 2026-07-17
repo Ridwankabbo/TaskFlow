@@ -50,7 +50,7 @@ class UserRegistrationView(BaseAPIView):
 class UserLoginView(BaseAPIView):
     
     def post(self, request):
-        serializer = UserLoginSerializer(data=request.data)
+        serializer = UserLoginSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             
             tokens = generate_tokens(request.user)
@@ -106,8 +106,7 @@ class ResendOTPView(BaseAPIView):
             message='Failed to resend OTP',
             data=serializer.errors,
             status_code=status.HTTP_400_BAD_REQUEST
-        )
-        
+        )    
 
 # -------------------
 #   LOGOUT VIEW
