@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     
     # installed app
     'django_celery_results',
-    'django_celery_beat'
+    # 'django_celery_beat',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -167,5 +168,11 @@ OPEN_AI_API = os.getenv('OPEN_ROUTER')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+}
+from datetime import timedelta
+SIMPLE_JWT={
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }

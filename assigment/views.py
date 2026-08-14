@@ -13,6 +13,8 @@ class AssigmentViewSet(viewsets.ModelViewSet):
     queryset = Assignment.objects.all()
     
     def get_queryset(self):
+        if not self.request.user or not self.request.user.is_authenticated:
+            return Assignment.objects.none()
         return self.queryset.filter(user=self.request.user)
     
     def create(self, request, *args, **kwargs):
@@ -31,3 +33,6 @@ class AssigmentViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(assignment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    # def list(self, request, *args, **kwargs):
+    #     return 

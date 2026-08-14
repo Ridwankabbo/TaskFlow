@@ -21,15 +21,29 @@ from .utils import (
     OTPManager,
     generate_tokens
 )
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 # Create your views here.
 
 # ----------------------------
 #   User regestration view
 # ----------------------------
 class UserRegistrationView(BaseAPIView):
-    
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    serializer_class = UserRegistrationSerializer
+    @extend_schema(
+        request= UserRegistrationSerializer,
+        parameters=[
+            OpenApiParameter(
+                name='sample_params',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Optional query param"
+            )
+        ]
+    )
     def post(self, request):
-        serializer = UserRegistrationSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
             
@@ -48,9 +62,21 @@ class UserRegistrationView(BaseAPIView):
 #   User login view
 # ---------------------------
 class UserLoginView(BaseAPIView):
-    
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    serializer_class = UserLoginSerializer
+    @extend_schema(
+        request= UserLoginSerializer,
+        parameters=[
+            OpenApiParameter(
+                name='sample_params',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Optional query param"
+            )
+        ]
+    )
     def post(self, request):
-        serializer = UserLoginSerializer(data=request.data, context={'request': request})
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():
             
             tokens = generate_tokens(request.user)
@@ -68,14 +94,17 @@ class UserLoginView(BaseAPIView):
             status_code=status.HTTP_400_BAD_REQUEST
         )
             
-            
 # ---------------------------
 #   Otp verification view
 # ---------------------------        
 class OtpVerificationView(BaseAPIView):
-    
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    serializer_class = OptVerificationSerializer
+    @extend_schema(
+        request=OptVerificationSerializer
+    )
     def post(self, request):
-        serializer = OptVerificationSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         
         if serializer.is_valid():
             return self.success_response(
@@ -93,9 +122,12 @@ class OtpVerificationView(BaseAPIView):
 #   RESEND OTP
 # ----------------------
 class ResendOTPView(BaseAPIView):
-    
+    serializer_class = ResendOTPSerializer
+    @extend_schema(
+        request= ResendOTPSerializer
+    )
     def post(self, request):
-        serializer = ResendOTPSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return self.success_response(
@@ -112,7 +144,6 @@ class ResendOTPView(BaseAPIView):
 #   LOGOUT VIEW
 #--------------------
 class LogoutView(BaseAPIView):
-    
     def post(self, request):
         try:
             refresh_token = request.data('refresh')
@@ -132,10 +163,13 @@ class LogoutView(BaseAPIView):
 #   PASSWORD RESET VIEW
 # --------------------------
 class PassResetView(BaseAPIView):
-    
+    serializer_class = ResetPasswordSerializer
+    @extend_schema(
+        request=ResetPasswordSerializer
+    )
     def post(self, request):
         
-        serializer = ResetPasswordSerializer(request.data)
+        serializer = self.serializer_class(request.data)
         if serializer.is_valid():
             new_password = serializer.validated_data.get('new_password')
             user = get_object_or_404(User, id=request.user.id)
@@ -153,10 +187,10 @@ class PassResetView(BaseAPIView):
 #   USER PROFILE VIEW
 #-----------------------------   
 class ProfileView(BaseAPIView):
-    serializer = UserProfileSerializer
+    serializer_class = UserProfileSerializer
     def get(self, request):
         profile = UserProfile.objects.get(user=request.user)
-        serializer = self.serializer(profile)
+        serializer = self.serializer_class(profile)
         
         return self.success_response(
             message='User profile view',
